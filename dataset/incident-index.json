@@ -1,0 +1,173 @@
+{
+  "index": {
+    "119204": [
+      "INC-119"
+    ],
+    "884210": [
+      "INC-102"
+    ],
+    "a": [
+      "INC-087",
+      "INC-119"
+    ],
+    "affected": [
+      "INC-087"
+    ],
+    "alarm": [
+      "INC-102"
+    ],
+    "arrived": [
+      "INC-102"
+    ],
+    "berth": [
+      "INC-131"
+    ],
+    "cargo": [
+      "INC-087",
+      "INC-131"
+    ],
+    "checked": [
+      "INC-102"
+    ],
+    "completed": [
+      "INC-131"
+    ],
+    "congestion": [
+      "INC-087"
+    ],
+    "contact": [
+      "INC-119"
+    ],
+    "container": [
+      "INC-102",
+      "INC-119"
+    ],
+    "crane": [
+      "INC-119"
+    ],
+    "damage": [
+      "INC-131"
+    ],
+    "delay": [
+      "INC-087",
+      "INC-119"
+    ],
+    "disruption": [
+      "INC-131"
+    ],
+    "exposed": [
+      "INC-087"
+    ],
+    "first": [
+      "INC-087"
+    ],
+    "followed": [
+      "INC-119"
+    ],
+    "gate": [
+      "INC-087"
+    ],
+    "harborflow": [
+      "INC-102",
+      "INC-119"
+    ],
+    "identifiers": [
+      "INC-087"
+    ],
+    "inspection": [
+      "INC-131"
+    ],
+    "late": [
+      "INC-119"
+    ],
+    "lead": [
+      "INC-119"
+    ],
+    "mscu1234567": [
+      "INC-102"
+    ],
+    "no": [
+      "INC-087"
+    ],
+    "notify": [
+      "INC-102"
+    ],
+    "on": [
+      "INC-131"
+    ],
+    "ops": [
+      "INC-102"
+    ],
+    "or": [
+      "INC-131"
+    ],
+    "reefer": [
+      "INC-102",
+      "INC-119"
+    ],
+    "release": [
+      "INC-119"
+    ],
+    "reopened": [
+      "INC-131"
+    ],
+    "routine": [
+      "INC-131"
+    ],
+    "schedule": [
+      "INC-131"
+    ],
+    "se": [
+      "INC-102",
+      "INC-119"
+    ],
+    "seal": [
+      "INC-102",
+      "INC-119"
+    ],
+    "shift": [
+      "INC-119"
+    ],
+    "temperature": [
+      "INC-102"
+    ],
+    "tghu7654321": [
+      "INC-119"
+    ],
+    "the": [
+      "INC-087",
+      "INC-102",
+      "INC-131"
+    ],
+    "transfer": [
+      "INC-119"
+    ],
+    "unloading": [
+      "INC-087"
+    ],
+    "used": [
+      "INC-119"
+    ],
+    "was": [
+      "INC-102"
+    ],
+    "were": [
+      "INC-087"
+    ],
+    "window": [
+      "INC-087"
+    ],
+    "with": [
+      "INC-102"
+    ],
+    "without": [
+      "INC-131"
+    ]
+  },
+  "titles": {
+    "INC-087": "Gate congestion delay",
+    "INC-102": "Reefer temperature deviation",
+    "INC-119": "Reefer transfer delayed",
+    "INC-131": "Routine inspection completed"
+  }
+}

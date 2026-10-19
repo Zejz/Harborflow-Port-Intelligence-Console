@@ -29,6 +29,9 @@ the program. Fields marked optional may be absent.
 ## `incidents/*.json`
 
 - `incident_id`, `call_id`, `title`, and `report` (required).
+- Task 9 caches normalized report-word postings and incident titles in
+  `incident-index.json`; the cache is rebuilt when it is missing, malformed,
+  or older than any incident source file.
 
 ## `port_calls.csv`
 

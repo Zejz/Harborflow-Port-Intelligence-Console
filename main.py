@@ -12,6 +12,11 @@ from tasks_2_6 import (
     service_priority_cargo,
     service_sanitize_incident,
 )
+from tasks_7_9 import (
+    service_longest_stable_sequence,
+    service_search_incidents,
+    service_weather_risk,
+)
 
 MENU = """HARBORFLOW PORT INTELLIGENCE
 1. List registered vessels
@@ -32,7 +37,7 @@ def service_list_vessels():
     print_vessel_inventory(vessels, rejected)
 
 
-# Services 7-9 are not implemented yet, so they are not listed here.
+# Services not yet implemented are not listed here.
 SERVICES = {
     1: service_list_vessels,
     2: service_inspect_manifest,
@@ -40,6 +45,9 @@ SERVICES = {
     4: service_export_customer_profile,
     5: service_calls_by_month,
     6: service_sanitize_incident,
+    7: service_longest_stable_sequence,
+    8: service_weather_risk,
+    9: service_search_incidents,
 }
 
 
@@ -65,4 +73,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

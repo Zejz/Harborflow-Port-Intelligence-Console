@@ -19,3 +19,8 @@ def sanitize_text(text):
     text, seals = SEAL_PATTERN.subn("[SEAL]", text)
     text, containers = CONTAINER_PATTERN.subn("[CONTAINER]", text)
     return text, emails + seals + containers
+
+
+def incident_words(text):
+    """Return lowercase words from text with punctuation used as separators."""
+    return re.findall(r"\b\w+\b", text.lower())

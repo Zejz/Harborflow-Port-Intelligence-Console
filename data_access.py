@@ -15,7 +15,9 @@ VESSELS_DIR = DATASET_DIR / "vessels"
 MANIFESTS_DIR = DATASET_DIR / "manifests"
 SHIPMENTS_DIR = DATASET_DIR / "shipments"
 INCIDENTS_DIR = DATASET_DIR / "incidents"
+INCIDENT_INDEX_FILE = DATASET_DIR / "incident-index.json"
 PORT_CALLS_FILE = DATASET_DIR / "port_calls.csv"
+WEATHER_FILE = DATASET_DIR / "weather.csv"
 
 EXPORTS_DIR = Path("exports")
 CUSTOMER_PROFILES_FILE = EXPORTS_DIR / "customer-profiles.csv"
@@ -26,6 +28,13 @@ SHIPMENT_FIELDS = {"shipment_id", "customer", "destination", "weight_kg", "prior
 MANIFEST_FIELDS = {"call_id", "vessel_id", "shipment_ids", "event_codes"}
 INCIDENT_FIELDS = {"incident_id", "call_id", "title", "report"}
 PORT_CALL_COLUMNS = ["call_id", "vessel_id", "port_code", "arrival_date"]
+WEATHER_COLUMNS = [
+    "port_code",
+    "date",
+    "wind_kmh",
+    "precipitation_mm",
+    "wave_height_m",
+]
 PROFILE_COLUMNS = [
     "customer",
     "shipment_count",
@@ -167,6 +176,67 @@ def load_incidents(directory):
     return load_json_records(directory, validate_incident)
 
 
+def load_incident_index(path=INCIDENT_INDEX_FILE, incidents_directory=INCIDENTS_DIR):
+    """Load a current incident index, or return None when it needs rebuilding."""
+    path = Path(path)
+    try:
+        cache_modified = path.stat().st_mtime
+    except FileNotFoundError:
+        return None
+
+    source_directory = Path(incidents_directory)
+    try:
+        source_paths = [
+            source_path
+            for source_path in source_directory.iterdir()
+            if source_path.is_file() and source_path.suffix.lower() == ".json"
+        ]
+    except FileNotFoundError:
+        source_paths = []
+    for source_path in source_paths:
+        if source_path.stat().st_mtime > cache_modified:
+            return None
+
+    cached = load_json(path)
+    if not isinstance(cached, dict) or set(cached) != {"index", "titles"}:
+        raise ValueError("Incident index must contain index and titles objects")
+    index = cached["index"]
+    titles = cached["titles"]
+    if not isinstance(index, dict) or not isinstance(titles, dict):
+        raise ValueError("Incident index and titles must be objects")
+    if not all(
+        isinstance(word, str)
+        and isinstance(incident_ids, list)
+        and all(isinstance(incident_id, str) for incident_id in incident_ids)
+        and len(incident_ids) == len(set(incident_ids))
+        for word, incident_ids in index.items()
+    ):
+        raise ValueError("Incident index entries must map words to incident ID lists")
+    if not all(
+        isinstance(incident_id, str) and isinstance(title, str)
+        for incident_id, title in titles.items()
+    ):
+        raise ValueError("Incident titles must map incident IDs to titles")
+    if any(
+        incident_id not in titles
+        for incident_ids in index.values()
+        for incident_id in incident_ids
+    ):
+        raise ValueError("Incident index references an ID without a title")
+    return index, titles
+
+
+def save_incident_index(index, titles, path=INCIDENT_INDEX_FILE):
+    """Write the incident search index atomically as JSON."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temp_path = path.with_name(path.name + ".tmp")
+    with open(temp_path, "w", encoding="utf-8", newline="") as file:
+        json.dump({"index": index, "titles": titles}, file, ensure_ascii=False, indent=2)
+        file.write("\n")
+    os.replace(temp_path, path)
+
+
 def load_port_calls(path=PORT_CALLS_FILE):
     """Read port_calls.csv into a list of dicts with stripped string values.
 
@@ -184,6 +254,36 @@ def load_port_calls(path=PORT_CALLS_FILE):
             if any(call.values()):
                 calls.append(call)
     return calls
+
+
+def load_weather(path=WEATHER_FILE):
+    """Return valid weather forecasts and (line number, reason) for bad rows."""
+    with open(path, "r", encoding="utf-8-sig", newline="") as file:
+        reader = csv.DictReader(file)
+        missing = set(WEATHER_COLUMNS) - set(reader.fieldnames or [])
+        if missing:
+            raise ValueError(f"Missing columns: {', '.join(sorted(missing))}")
+
+        forecasts = []
+        rejected = []
+        for row in reader:
+            forecast = {
+                name: (row.get(name) or "").strip()
+                for name in WEATHER_COLUMNS
+            }
+            if not any(forecast.values()):
+                continue
+            if not forecast["port_code"] or not forecast["date"]:
+                rejected.append((reader.line_num, "missing port_code or date"))
+                continue
+            try:
+                for name in ("wind_kmh", "precipitation_mm", "wave_height_m"):
+                    forecast[name] = float(forecast[name])
+            except ValueError as error:
+                rejected.append((reader.line_num, str(error)))
+                continue
+            forecasts.append(forecast)
+    return forecasts, rejected
 
 
 # ---------------------------------------------------------------------------

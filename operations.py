@@ -3,6 +3,8 @@
 No input() or print() here and no file access: functions take data and return
 data, so they can be tested and explained on their own.
 """
+import text_tools
+
 from data_access import parse_iso_date
 
 MONTH_NAMES = [
@@ -47,6 +49,104 @@ def index_shipments(shipments):
     for shipment in shipments:
         by_id.setdefault(shipment["shipment_id"], shipment)
     return by_id
+
+
+def find_longest_stable_sequence(event_codes):
+    """Return the first longest contiguous sequence without repeated event codes."""
+    window_start = 0
+    most_recent_positions = {}
+    longest_start = 0
+    longest_length = 0
+
+    for position, event_code in enumerate(event_codes):
+        previous_position = most_recent_positions.get(event_code)
+        if previous_position is not None and previous_position >= window_start:
+            window_start = previous_position + 1
+        most_recent_positions[event_code] = position
+
+        window_length = position - window_start + 1
+        if window_length > longest_length:
+            longest_start = window_start
+            longest_length = window_length
+
+    return event_codes[longest_start:longest_start + longest_length]
+
+
+def weather_recommendations(forecast):
+    """Return all applicable weather recommendations in business-rule order."""
+    recommendations = []
+    wind = forecast["wind_kmh"]
+    rain = forecast["precipitation_mm"]
+    waves = forecast["wave_height_m"]
+
+    if wind >= 45:
+        recommendations.append("Suspend crane operations.")
+    if waves >= 2.5:
+        recommendations.append("Arrange tug assistance.")
+    if rain >= 8 and wind < 45:
+        recommendations.append("Prepare covered handling.")
+    if wind < 45 and waves < 2.5 and rain < 8:
+        recommendations.append("Normal operating plan.")
+    return recommendations
+
+
+def weather_risk_for_calls(port_calls, vessel_id, reference_date, forecasts):
+    """Return sorted upcoming calls with forecasts and invalid-call-date messages."""
+    forecasts_by_key = {}
+    for forecast in forecasts:
+        key = (forecast["port_code"], forecast["date"])
+        forecasts_by_key.setdefault(key, forecast)
+
+    upcoming = []
+    problems = []
+    for call in port_calls:
+        if call["vessel_id"] != vessel_id:
+            continue
+        try:
+            arrival = parse_iso_date(call["arrival_date"])
+        except ValueError:
+            problems.append(
+                f"Skipped port call {call['call_id']}: invalid arrival date "
+                f"'{call['arrival_date']}'"
+            )
+            continue
+        if arrival < reference_date:
+            continue
+
+        forecast = forecasts_by_key.get((call["port_code"], call["arrival_date"]))
+        recommendations = (
+            weather_recommendations(forecast) if forecast is not None else []
+        )
+        upcoming.append(
+            (arrival, call["port_code"], call["call_id"], forecast, recommendations)
+        )
+
+    upcoming.sort(key=lambda item: (item[0], item[2]))
+    return upcoming, problems
+
+
+def build_incident_index(incidents):
+    """Build word-to-incident postings and an incident ID-to-title lookup."""
+    index = {}
+    titles = {}
+    for incident in incidents:
+        incident_id = incident["incident_id"]
+        titles.setdefault(incident_id, incident["title"])
+        for word in set(text_tools.incident_words(incident["report"])):
+            index.setdefault(word, set()).add(incident_id)
+    return (
+        {word: sorted(incident_ids) for word, incident_ids in sorted(index.items())},
+        dict(sorted(titles.items())),
+    )
+
+
+def search_incident_index(index, query):
+    """Return positive distinct-word scores sorted by score then incident ID."""
+    scores = {}
+    for word in set(text_tools.incident_words(query)):
+        for incident_id in index.get(word, []):
+            scores[incident_id] = scores.get(incident_id, 0) + 1
+    return sorted(scores.items(), key=lambda result: (-result[1], result[0]))
 
 
 def _is_true(shipment, flag):
