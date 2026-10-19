@@ -12,8 +12,9 @@ Contribution:
 Coded and implimented task 0 and 1
 
 
-Name:
+Name: Mykhailo Asmar
 Contribution:
+Coded and implimented tasks 2 - 6
 
 Name:
 Contribution:
