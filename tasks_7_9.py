@@ -106,10 +106,11 @@ def service_search_incidents():
 
     query = input("Search incident reports: ")
     matches = operations.search_incident_index(index, query)
-    if not matches:
-        print("No matching incidents found.")
-        return
 
     print(f"Matches for '{query.strip()}':")
     for incident_id, score in matches:
         print(f"- {incident_id} | score {score} | {titles[incident_id]}")
+
+    if not matches:
+            print("No matching incidents found.")
+            return

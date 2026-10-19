@@ -81,7 +81,7 @@ def service_inspect_manifest():
 
     vessel = operations.find_vessel_by_name(vessels, input("Vessel name: "))
     if vessel is None:
-        print("Vessel not found")
+        print("Vessel not found.")
         return
     reference_date = prompt_reference_date()
 
@@ -115,7 +115,7 @@ def service_priority_cargo():
         return
     call = operations.find_call(port_calls, call_id)
     if call is None:
-        print("Port call not found")
+        print("Port call not found.")
         return
 
     manifests, _ = data_access.load_manifests(data_access.MANIFESTS_DIR)
@@ -209,4 +209,4 @@ def service_sanitize_incident():
     except OSError as error:
         print(f"Error - Could not write {output_path.as_posix()}: {error}")
         return
-    print(f"Sanitized report saved: {output_path.as_posix()}")
+    print(f"Incident sanitized: {output_path.as_posix()}")
